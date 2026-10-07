@@ -10,7 +10,12 @@ import { toast } from 'sonner';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
 import { Language, languages } from '@/lib/i18n/translations';
 
-export default function GoogleLoginForm() {
+export interface GoogleLoginFormProps {
+  /** Reserved for future multi-mode support; currently unused but accepted to satisfy page callers. */
+  initialMode?: 'login' | 'register';
+}
+
+export default function GoogleLoginForm(_props: GoogleLoginFormProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { lang, setLang, t, dir } = useLanguage();

@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "skills": {
+    "animation-on-scroll": {
+      "source": "MengTo/Skills",
+      "sourceType": "github",
+      "skillPath": ".agents/skills/animation-on-scroll/SKILL.md",
+      "computedHash": "12fd86ebbbe4d7baa11148ecc1bd4dcc1a188f7262d34d47d3b6ca169a432b9e"
+    }
+  }
+}

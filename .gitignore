@@ -19,6 +19,7 @@
 
 # production
 /build
+ignore
 
 # misc
 .DS_Store

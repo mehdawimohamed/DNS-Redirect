@@ -79,8 +79,17 @@ sudo nano /etc/dnsmasq.conf
 Paste this (replace `192.168.1.100` with your actual machine IP):
 
 ```ini
-# Redirect ALL domains to your portal machine
+# Redirect ALL domains (including OS probe domains) to your portal machine
 address=/#/192.168.1.100
+
+# Explicitly ensure OS captive portal probe domains resolve to your server IP:
+# Android:   connectivitycheck.gstatic.com
+# iPhone:    captive.apple.com
+# Windows:   www.msftconnecttest.com
+address=/connectivitycheck.gstatic.com/192.168.1.100
+address=/connectivitycheck.android.com/192.168.1.100
+address=/captive.apple.com/192.168.1.100
+address=/www.msftconnecttest.com/192.168.1.100
 
 # Listen on all interfaces
 listen-address=0.0.0.0
@@ -106,18 +115,30 @@ sudo systemctl start dnsmasq
 sudo systemctl enable dnsmasq           # auto-start on boot
 ```
 
-### Verify DNS is working
+### OS Probe Hostnames & Automatic Captive Portal Popups
 
-From your machine or another device on the network:
+When devices join Wi-Fi, their OS automatically issues HTTP requests to specific probe URLs:
+* **Android:** `http://connectivitycheck.gstatic.com/generate_204`
+* **iPhone / iOS / macOS:** `http://captive.apple.com/hotspot-detect.html`
+* **Windows:** `http://www.msftconnecttest.com/connecttest.txt`
 
-```powershell
-nslookup google.com 192.168.1.100
-# Expected output:
-# Server:  192.168.1.100
-# Address: 192.168.1.100
-# Name:    google.com
-# Address: 192.168.1.100   ← your machine's IP (redirect working!)
-```
+Our Next.js middleware intercepts these plain HTTP probe requests and replies with a **HTTP 302 Redirect** pointing to `/wifi`. Because the probe expected a specific status code (e.g. `204 No Content` for Android or `Success` HTML for iOS) but received a `302 Redirect`, the operating system immediately detects a captive portal and automatically opens the native sign-in popup.
+
+> 🔒 **HTTPS & Certificate Errors:**  
+> HTTPS requests (e.g. opening `https://google.com`) before logging in will produce an expected browser certificate warning because SSL encryption prevents domain impersonation. Once the user signs in via the automatic portal popup, full normal browsing is restored.
+
+### 💡 Optional: Re-triggering Popups aggressively if User Closes It
+
+If a user closes or dismisses the captive portal popup without signing in, you can force the phone to automatically re-open the popup every 2 minutes by setting a **short DHCP Lease Time**:
+
+* **If using your Router for DHCP:** In your router admin panel under **DHCP Settings**, set **Address Lease Time** to `2 minutes` (or `120 seconds`).
+* **If using `dnsmasq` as your DHCP server:** Add `dhcp-range` to `/etc/dnsmasq.conf`:
+  ```ini
+  # Optional: Enable DHCP on dnsmasq with short 2-minute leases
+  dhcp-range=192.168.1.100,192.168.1.200,2m
+  ```
+
+*How it works:* Every 2 minutes when the device renews its IP lease, the OS re-runs its HTTP probe checks (`gstatic.com` / `apple.com`). Since pre-login probes return `302 Redirect`, the OS automatically re-opens the popup window!
 
 ---
 

@@ -30,6 +30,24 @@ export default function GoogleLoginForm(_props: GoogleLoginFormProps) {
   const gatewaySession = searchParams.get('tok') || searchParams.get('gateway_session') || 'mock-tok-123';
   const gatewayId = searchParams.get('gateway_id') || 'gateway_001';
 
+  // Dynamically extract Wi-Fi SSID / Network Name sent by Router / OpenNDS / Gateway
+  const extractWifiName = (): string => {
+    const paramKeys = ['wifi_name', 'ssid', 'gateway_name', 'gatewayname', 'gw_name', 'nasid', 'ap_name', 'wifi', 'network'];
+    for (const key of paramKeys) {
+      const val = searchParams.get(key);
+      if (val && val.trim() !== '') {
+        try {
+          return decodeURIComponent(val).replace(/[_+]/g, ' ').trim();
+        } catch {
+          return val.replace(/[_+]/g, ' ').trim();
+        }
+      }
+    }
+    return 'Guest Wi-Fi';
+  };
+
+  const wifiName = extractWifiName();
+
   const loginForm = useForm<LoginInput>({
     resolver: zodResolver(loginSchema),
     defaultValues: { email: '', password: '' },
@@ -179,6 +197,17 @@ export default function GoogleLoginForm(_props: GoogleLoginFormProps) {
               <p className="text-base text-[#c4c7c5] font-normal">
                 {t.continueTo} <span className="text-[#e3e3e3] font-medium">{t.wifiAccess}</span>
               </p>
+
+              {/* Network Access Control Banner */}
+              <div className="mt-2 p-3.5 rounded-xl bg-[#282a2d] border border-[#444746] flex items-start space-x-3 text-left w-full">
+                <ShieldAlert className="w-5 h-5 text-[#a8c7fa] shrink-0 mt-0.5" />
+                <div className="space-y-0.5 text-xs sm:text-sm">
+                  <p className="font-medium text-[#e3e3e3]">{t.networkAccessTitle}</p>
+                  <p className="text-[#c4c7c5] leading-relaxed">
+                    {t.networkAccessDesc(wifiName)}
+                  </p>
+                </div>
+              </div>
             </div>
 
             {/* Right Column: Form Controls */}

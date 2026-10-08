@@ -22,20 +22,15 @@ function getClient() {
     console.warn('[db] DIRECT_DATABASE_URL not set — using in-memory fallback');
     return null;
   }
-  try {
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const postgres = require('postgres') as typeof import('postgres');
-    sql = postgres(url, {
-      ssl: 'require',
-      max: 5,
-      idle_timeout: 30,
-      connect_timeout: 10,
-    });
-    return sql;
-  } catch (e) {
-    console.error('[db] Failed to initialize postgres client:', e);
-    return null;
-  }
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const postgres = require('postgres') as typeof import('postgres');
+  sql = postgres(url, {
+    ssl: 'require',
+    max: 5,
+    idle_timeout: 30,
+    connect_timeout: 10,
+  });
+  return sql;
 }
 
 // ─── In-memory fallback (no DB configured) ───────────────────────────────────

@@ -30,6 +30,10 @@ export interface Translations {
   guestUnavailableTitle: string;
   guestUnavailableDesc: string;
   
+  // Network Access Control Notice
+  networkAccessTitle: string;
+  networkAccessDesc: (wifiName: string) => string;
+
   // Success Page
   accessGranted: string;
   connectedTo: string;
@@ -76,6 +80,9 @@ export const dictionaries: Record<Language, Translations> = {
     protectedTermsDesc: 'Sign in first to view the Terms of Service.',
     guestUnavailableTitle: 'Guest Mode Unavailable',
     guestUnavailableDesc: 'Guest mode is not available for the moment.',
+
+    networkAccessTitle: 'Network Access Control',
+    networkAccessDesc: (wifiName) => `As a security measure for ${wifiName}, user authentication is required before internet access is granted.`,
     
     accessGranted: 'Wi-Fi Access Granted',
     connectedTo: 'You are now authorized and connected to',
@@ -115,6 +122,9 @@ export const dictionaries: Record<Language, Translations> = {
     protectedTermsDesc: "Connectez-vous d'abord pour lire les conditions d'utilisation.",
     guestUnavailableTitle: 'Mode Invité non disponible',
     guestUnavailableDesc: "Le mode Invité n'est pas disponible pour le moment.",
+
+    networkAccessTitle: "Contrôle d'accès réseau",
+    networkAccessDesc: (wifiName) => `Par mesure de sécurité pour ${wifiName}, une authentification utilisateur est requise avant d'accéder à Internet.`,
     
     accessGranted: 'Accès Wi-Fi accordé',
     connectedTo: 'Vous êtes maintenant autorisé et connecté à',
@@ -154,6 +164,9 @@ export const dictionaries: Record<Language, Translations> = {
     protectedTermsDesc: 'يرجى تسجيل الدخول أولاً لعرض شروط استخدام Wi-Fi.',
     guestUnavailableTitle: 'وضع الضيف غير متاح',
     guestUnavailableDesc: 'وضع الضيف غير متاح في الوقت الحالي.',
+
+    networkAccessTitle: 'التحكم في الوصول إلى الشبكة',
+    networkAccessDesc: (wifiName) => `كإجراء أمني لشبكة ${wifiName}، يلزم توثيق المستخدم قبل السماح بالوصول إلى الإنترنت.`,
     
     accessGranted: 'تم منح الوصول إلى Wi-Fi',
     connectedTo: 'أنت الآن مخول ومتصل بـ',

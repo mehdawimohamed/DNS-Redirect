@@ -69,6 +69,20 @@ CREATE TABLE IF NOT EXISTS wifi_sessions (
   status TEXT NOT NULL DEFAULT 'active' CHECK (status IN ('active', 'expired', 'revoked', 'ended'))
 );
 
+-- 7. User Activity Logs Table (DNS / Domain Requests)
+CREATE TABLE IF NOT EXISTS user_activity_logs (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id UUID NULL REFERENCES users(id) ON DELETE SET NULL,
+  client_ip VARCHAR(45) NOT NULL,
+  client_mac VARCHAR(17) NULL,
+  domain_requested VARCHAR(255) NOT NULL,
+  created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
+);
+
+-- Index for fast user activity lookups
+CREATE INDEX IF NOT EXISTS idx_activity_user ON user_activity_logs(user_id);
+CREATE INDEX IF NOT EXISTS idx_activity_created ON user_activity_logs(created_at);
+
 CREATE INDEX IF NOT EXISTS idx_wifi_sessions_user ON wifi_sessions(user_id);
 CREATE INDEX IF NOT EXISTS idx_wifi_sessions_gateway ON wifi_sessions(gateway_id);
 CREATE INDEX IF NOT EXISTS idx_wifi_sessions_client ON wifi_sessions(client_identifier);

@@ -9,7 +9,7 @@
  * need to change.
  */
 
-import { User, UserSession, WifiSession, CoffeeShop, WifiGatewayInfo } from '@/types';
+import { User, UserSession, WifiSession, CoffeeShop, WifiGatewayInfo, UserActivityLog } from '@/types';
 
 // ─── Supabase / Postgres client ───────────────────────────────────────────────
 
@@ -38,6 +38,7 @@ function getClient() {
 const memoryUsers: Map<string, User> = new Map();
 const memoryUserSessions: Map<string, UserSession> = new Map();
 const memoryWifiSessions: Map<string, WifiSession> = new Map();
+const memoryActivityLogs: Map<string, UserActivityLog> = new Map();
 
 // ─── Static defaults ─────────────────────────────────────────────────────────
 
@@ -305,6 +306,52 @@ export const db = {
       return null;
     },
   },
+
+  userActivityLogs: {
+    async create(data: {
+      userId?: string | null;
+      clientIp: string;
+      clientMac?: string | null;
+      domainRequested: string;
+    }): Promise<UserActivityLog> {
+      const client = getClient();
+
+      if (client) {
+        const rows = await client<Record<string, unknown>[]>`
+          INSERT INTO user_activity_logs (
+            user_id, client_ip, client_mac, domain_requested
+          ) VALUES (
+            ${data.userId ?? null}, ${data.clientIp}, ${data.clientMac ?? null}, ${data.domainRequested}
+          )
+          RETURNING *
+        `;
+        const row = rows[0];
+        return {
+          id: row.id as string,
+          userId: (row.user_id as string | null) ?? undefined,
+          clientIp: row.client_ip as string,
+          clientMac: (row.client_mac as string | null) ?? undefined,
+          domainRequested: row.domain_requested as string,
+          createdAt: row.created_at instanceof Date
+            ? (row.created_at as Date).toISOString()
+            : row.created_at as string,
+        };
+      }
+
+      const id = `act_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
+      const logEntry: UserActivityLog = {
+        id,
+        userId: data.userId ?? null,
+        clientIp: data.clientIp,
+        clientMac: data.clientMac ?? null,
+        domainRequested: data.domainRequested,
+        createdAt: new Date().toISOString(),
+      };
+      memoryActivityLogs.set(id, logEntry);
+      return logEntry;
+    },
+  },
 };
+
 
 

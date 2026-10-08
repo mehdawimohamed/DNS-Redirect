@@ -75,3 +75,13 @@ export interface WifiGatewayAdapter {
   authorizeClient(input: AuthorizeClientInput): Promise<AuthorizationResult>;
   revokeClient(gatewayId: string, clientMac: string): Promise<boolean>;
 }
+
+export interface UserActivityLog {
+  id: string;
+  userId?: string | null;
+  clientIp: string;
+  clientMac?: string | null;
+  domainRequested: string;
+  createdAt: string;
+}
+

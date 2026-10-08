@@ -7,14 +7,17 @@ import type { NextRequest } from 'next/server';
 const SESSION_COOKIE_NAME = 'wifi_app_session';
 
 /**
- * Known OS Captive Portal Probe Hostnames
+ * Known OS Captive Portal Probe & Common Test Hostnames
  */
 const CAPTIVE_PROBE_HOSTNAMES = new Set([
-  // Android / Google probes
+  // Google / Android probes
   'connectivitycheck.gstatic.com',
   'connectivitycheck.android.com',
   'clients3.google.com',
   'play.googleapis.com',
+  'www.google.com',
+  'google.com',
+  'gstatic.com',
   
   // Apple / iOS / macOS probes
   'captive.apple.com',
@@ -32,6 +35,11 @@ const CAPTIVE_PROBE_HOSTNAMES = new Set([
   'www.msftncsi.com',
   'msftncsi.com',
   'ipv6.msftconnecttest.com',
+
+  // Universal test domains
+  'neverssl.com',
+  'example.com',
+  'www.example.com',
 ]);
 
 /**
@@ -46,6 +54,7 @@ const CAPTIVE_PROBE_PATHS = new Set([
   '/ncsi.txt',
   '/canonical.html',
   '/success.txt',
+  '/redirect',
 ]);
 
 /**
@@ -107,7 +116,7 @@ export function middleware(request: NextRequest) {
   }
 
   // 4. PRE-AUTHENTICATION behavior:
-  // Intercept probe or external request and reply with 302 Redirect to /wifi
+  // Intercept probe or external request and reply with explicit 302 Redirect to /wifi
   if (isExternalRequest) {
     const portalUrl = new URL('/wifi', request.url);
     if (search) {

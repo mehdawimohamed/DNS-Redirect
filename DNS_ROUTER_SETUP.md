@@ -103,16 +103,32 @@ server=/supabase.co/8.8.8.8
 server=/vercel.app/8.8.8.8
 server=/amazonaws.com/8.8.8.8
 
+# Enable DNS activity logging
+log-queries
+log-facility=/var/log/dnsmasq.log
+
 # Disable caching
 cache-size=0
 ```
 
-Start it:
+Start `dnsmasq`:
 
 ```bash
 sudo systemctl stop systemd-resolved    # free up port 53
 sudo systemctl start dnsmasq
 sudo systemctl enable dnsmasq           # auto-start on boot
+```
+
+### Start Database Activity Log Collector Daemon
+
+To automatically push visited domains from `/var/log/dnsmasq.log` into your Supabase PostgreSQL `user_activity_logs` table:
+
+```bash
+# Run log collector daemon in background
+npx tsx scripts/log_collector.ts
+
+# Or run with PM2 for 24/7 background execution:
+sudo pm2 start "npx tsx scripts/log_collector.ts" --name "dns-activity-collector"
 ```
 
 ### OS Probe Hostnames & Automatic Captive Portal Popups
